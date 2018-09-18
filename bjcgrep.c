@@ -88,10 +88,6 @@ static void transition_push( void *noarg, regex_func_t f ) {
 
 static int transition_flush( const char *c ) {
 
-	if ( transition_stack == _transition_stack - 1 ) {
-		return 1;
-	}
-
 	while ( transition_stack != _transition_stack - 1 && match == 0 ) {
 		match = (*transition_stack)(c);
 		transition_stack--;
@@ -101,7 +97,7 @@ static int transition_flush( const char *c ) {
 		*(++transition_stack) = *edge_stack;
 	}
 
-	if ( match != 0 ) {
+	if ( match != 0 || *c == '\0' ) {
 		for ( ; transition_stack != _transition_stack - 1; transition_stack-- );
 		return 1;
 	}
@@ -741,9 +737,7 @@ int main( int argc, char** argv ) {
 		it = input;
 
 		do {
-			if ( *it != '\0' ) {
-				*(++transition_stack) = regex_exec_mem;
-			}
+			*(++transition_stack) = regex_exec_mem;
 		} while ( transition_flush( it++ ) != 1 );
 
 		if ( match != 0 ) {
