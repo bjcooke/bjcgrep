@@ -236,7 +236,7 @@ static uint64_t* concat( char c ) {
 	*((uint32_t *) regex_exec_tail) = c;
 	regex_exec_tail += 4;
 
-  /* movb (%rdi), %dl */
+	/* movb (%rdi), %dl */
 	*((uint16_t *) regex_exec_tail) = htons( 0x8A17 );
 	regex_exec_tail += 2;
 
