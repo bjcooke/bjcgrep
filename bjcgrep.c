@@ -298,7 +298,7 @@ static char* fetchline( FILE* stream  ) {
 				return NULL;
 			}
 
-			memcpy( tmp, line, sizeof(char) * i );
+			memcpy( tmp, line, sizeof(char) * (i + 1) );
 
 			free( line );
 			line = tmp;
