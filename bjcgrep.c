@@ -252,7 +252,7 @@ static uint64_t* concat( char c ) {
 	*(regex_exec_tail++) = 0x29;
 	*(regex_exec_tail++) = 0xD1;
 
-	/* jrcxz +1 */
+	/* jrcxz +3 */
 	*((uint16_t *) regex_exec_tail) = htons( 0xE303 );
 	regex_exec_tail += 2;
 
