@@ -45,8 +45,6 @@ typedef union {
 
 typedef int32_t (*regex_func_t)(const char *s);
 
-static item_t            _pstack[STACK_CAP];
-static item_t*           pstack = _pstack;
 static uint8_t*          regex_exec_mem = NULL;
 static uint8_t*          regex_exec_tail = NULL;
 static regex_func_t      _transition_stack[STACK_CAP];
@@ -323,12 +321,16 @@ int main( int argc, char** argv ) {
 	char *input, *it;
 	int retval = 1;
 
+	static item_t            _pstack[STACK_CAP];
+	static item_t*           pstack = _pstack;
+
 	uint64_t last_concat;
 	unsigned int null_offset;
 	uint64_t *forward_addr, *backward_addr, *edge_addr;
 	uint64_t *subexpr_head_stack, *union_head_stack;
 	uint64_t **accept_addr_stack;
 	unsigned int *union_offset_stack;
+
 	static uint64_t _subexpr_head_stack[STACK_CAP];
 	static uint64_t _union_head_stack[STACK_CAP];
 	static uint64_t *_accept_addr_stack[STACK_CAP];
