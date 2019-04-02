@@ -47,10 +47,8 @@ typedef int32_t (*regex_func_t)(const char *s);
 
 static uint8_t*          regex_exec_mem = NULL;
 static uint8_t*          regex_exec_tail = NULL;
-static regex_func_t      _transition_stack[STACK_CAP];
-static regex_func_t*     transition_stack = _transition_stack - 1;
-static regex_func_t      _edge_stack[STACK_CAP];
-static regex_func_t*     edge_stack = _edge_stack - 1;
+static regex_func_t      transition_map[STACK_CAP];
+static regex_func_t      edge_map[STACK_CAP];
 static int32_t           match = 0;
 
 
@@ -79,24 +77,36 @@ static uint16_t lex( const char *s ) {
 
 
 static void transition_push( void *noarg, regex_func_t f ) {
+
+	int i = (uint64_t) f % STACK_CAP;
+
 	noarg = noarg;
-	*(++edge_stack) = f;
+
+	while ( edge_map[i] != NULL && edge_map[i] != f ) {
+		i++;
+	}
+
+	if ( edge_map[i] == NULL ) {
+		edge_map[i] = f;
+	}
+
 }
 
 
 static int transition_flush( const char *c ) {
 
-	while ( transition_stack != _transition_stack - 1 && match == 0 ) {
-		match = (*transition_stack)(c);
-		transition_stack--;
+	int i;
+
+	for ( i = 0; i < STACK_CAP && match == 0; i++ ) {
+		if ( transition_map[i] != NULL ) {
+			match = transition_map[i](c);
+		}
 	}
 
-	for ( ; edge_stack != _edge_stack - 1; edge_stack-- ) {
-		*(++transition_stack) = *edge_stack;
-	}
+	memcpy( transition_map, edge_map, sizeof(regex_func_t) * STACK_CAP );
+	memset( edge_map, 0, sizeof(regex_func_t) * STACK_CAP );
 
 	if ( match != 0 || *c == '\0' ) {
-		for ( ; transition_stack != _transition_stack - 1; transition_stack-- );
 		return 1;
 	}
 
@@ -739,7 +749,7 @@ int main( int argc, char** argv ) {
 		it = input;
 
 		do {
-			*(++transition_stack) = regex_exec_mem;
+			transition_map[ (uint64_t) regex_exec_mem % STACK_CAP ] = regex_exec_mem;
 		} while ( transition_flush( it++ ) != 1 );
 
 		if ( match != 0 ) {
