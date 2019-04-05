@@ -313,7 +313,7 @@ static char* fetchline( FILE* stream  ) {
 
 	line[i] = '\0';
 
-	if ( c == EOF ) {
+	if ( c == EOF && i == 0 ) {
 		free(line);
 		line = NULL;
 	}
